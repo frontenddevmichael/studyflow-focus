@@ -1,73 +1,226 @@
-# Welcome to your Lovable project
+STUDYFLOW
+A Frontend-Only Weekly Study Timetable Planner
 
-## Project info
+Course: ICT 235 – Frontend Software Development
+Level: 200 Level
+Institution: Bells University of Technology
+PROJECT NAME : Web App
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+1. Introduction
 
-## How can I edit this code?
+StudyFlow is a frontend-only web app designed to help out students in planning, organizing, their weekly study schedules. The project focuses on solving common academic isusses such as poor time management, overlapping study sessions, and unbalanced work.
 
-There are several ways of editing your application.
+Unlike normal  timetable apps that rely heavily on backend infrastructure, StudyFlow is intentionally adding as a client-side solution. This design choice focuses frontend logic, state management, user experience, and responsiveness—key objectives of the ICT 235 course.
 
-**Use Lovable**
+The application allows users to create, edit, and manage study sessions within a planned 
+weekly view while providing insights into productivity levels and available free time.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+2. Project Objectives
 
-Changes made via Lovable will be committed automatically to this repo.
+The primary objectives of StudyFlow are:
 
-**Use your preferred IDE**
+To design a interactive and user-friendly study timetable application 
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+To enable students to manage study sessions without backend dependencies
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+To implement intelligent conflict detection between study sessions
 
-Follow these steps:
+To provide productivity insights based on study duration and intensity
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+To demonstrate modern frontend development practices using React and TypeScript
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. System Architecture Overview
 
-# Step 3: Install the necessary dependencies.
-npm i
+StudyFlow follows a simple , component-based architecture using React and TypeScript.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+All application state is handled on the client This ensures that user data remains available across page reloads without requiring a backend server.
 
-**Edit a file directly in GitHub**
+Key plan Principles
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Clear separation of concerns
 
-**Use GitHub Codespaces**
+Reusable custom hooks for logic
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Centralized utility functions for time calculations
 
-## What technologies are used for this project?
+Type safety using TypeScript interfaces
 
-This project is built with:
+Predictable data flow
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+4. File Structure Overview
 
-## How can I deploy this project?
+The project structure is organized to reflect responsibility-based separation:
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+types/ – Defines core TypeScript interfaces and constants
 
-## Can I connect a custom domain to my Lovable project?
+hooks/ – Contains reusable logic for session management, persistence, free-time detection, and keyboard shortcuts
 
-Yes, you can!
+lib/ – Utility functions for time calculations and sample data generation
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+components/ – UI components responsible for rendering the timetable, forms, and insights
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+styles & config – Tailwind CSS configuration and design tokens
+
+This structure improves readability and supports long-term project maintenance.
+
+5. Design System and User Interface
+Design Philosophy
+
+StudyFlow adopts a soft-flat dark interface designed to reduce eye strain and maintain focus during extended study periods. The interface avoids excessive visual noise and prioritizes clarity and calmness.
+
+Color Scheme
+
+Primary background: Dark charcoal (#1e1e1e)
+
+Primary accent: Soft teal (used for actions and highlights)
+
+Muted subject colors for different session types
+
+Low-saturation workload indicators for intensity levels
+
+Typography
+
+Primary font: Inter (for readability)
+
+Monospace font: JetBrains Mono (used for time-related elements)
+
+6. Core Functionalities
+6.1 Study Session Management
+
+Users can:
+
+Create new study sessions
+
+Edit existing sessions
+
+Delete sessions when no longer needed
+
+Each session contains:
+
+Course name
+
+Day of the week
+
+Start and end time
+
+Session type (Lecture, Personal Study, Revision)
+
+Study intensity level
+
+Optional notes
+
+6.2 Time Collision Detection
+
+The application prevents overlapping study sessions on the same day.
+When a conflict is detected:
+
+The user is informed immediately
+
+The session cannot be saved until the conflict is resolved
+
+This feature ensures schedule consistency and reflects real-world timetable constraints.
+
+6.3 Productivity and Workload Analysis
+
+StudyFlow analyzes total study time and classifies workload levels:
+
+Daily and weekly study duration is calculated
+
+Workload is categorized as:
+
+Light
+
+Balanced
+
+Heavy
+
+Overloaded
+
+This allows users to evaluate whether their schedules are realistic and healthy.
+
+6.4 Focus Mode
+
+Focus Mode helps users concentrate on relevant tasks by:
+
+Highlighting the current day’s sessions
+
+Dimming non-relevant sessions
+
+Displaying a live current-time indicator
+
+This feature improves usability during active study periods.
+
+6.5 Free Time Detection
+
+The application automatically identifies available free time slots between scheduled sessions (within defined study hours).
+These slots can be used for:
+
+Revision
+
+Breaks
+
+Additional study planning
+
+7. Data Model
+
+Study sessions are represented using a structured TypeScript interface:
+
+Unique identifier
+
+Time fields stored in 24-hour format
+
+Metadata for creation and updates
+
+This ensures consistency, type safety and reliability 
+
+8. Data Persistence
+
+All user data is stored locally using the browser’s localStorage API.
+
+Key characteristics:
+
+No backend or database required
+
+Data persists across page refreshes
+
+Cross-tab synchronization using storage events
+
+9. Tools and Technologies Used
+
+React (v18) – Component-based UI development
+
+TypeScript – Static typing and reliability
+
+Tailwind CSS – Utility-first styling
+
+Radix UI – Accessible UI primitives
+
+Lucide Icons – Minimal iconography
+
+date-fns – Date and time manipulation
+
+Sonner – Toast notifications
+
+10. Production Readiness
+
+StudyFlow meets production-level frontend standards through:
+
+Complete CRUD functionality
+
+Robust conflict handling
+
+Persistent state management
+
+Responsive design across devices
+
+Accessible UI components
+
+Clean component structure
+
+Strict TypeScript configuration
+
+11. Conclusion
+
+StudyFlow successfully demonstrates how a frontend-only application can deliver meaningful functionality without backend complexity. The project emphasizes user experience, logical correctness, and modern frontend engineering practices.
+
+By combining structured scheduling, intelligent analysis, and a calm user interface, StudyFlow provides a practical solution to academic time management while fulfilling the objectives of the ICT 235 course.
