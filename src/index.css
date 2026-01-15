@@ -1,13 +1,10 @@
+/* Import fonts first */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Tailwind layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* StudyFlow Design System
-   A calm, focus-first study planner with soft-flat aesthetics
-   All colors are HSL for proper theming
-*/
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @layer base {
   :root {
@@ -117,6 +114,7 @@
 }
 
 @layer utilities {
+
   /* Session type backgrounds */
   .session-lecture {
     background-color: hsl(var(--session-lecture) / 0.15);
@@ -181,6 +179,7 @@
     opacity: 0;
     transform: translateY(4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -192,6 +191,7 @@
     opacity: 0;
     transform: translateX(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -202,6 +202,7 @@
   0%, 100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.7;
   }

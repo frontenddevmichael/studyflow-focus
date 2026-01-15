@@ -28,44 +28,56 @@ const Index = () => {
   } = useStudySessions();
 
   // Track if samples have been loaded
-  const [samplesLoaded, setSamplesLoaded] = useLocalStorage('studyflow_samples_loaded', false);
+  const [samplesLoaded, setSamplesLoaded] = useLocalStorage(
+    'studyflow_samples_loaded',
+    false
+  );
 
   // UI State
   const [focusMode, setFocusMode] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
   const [showInsights, setShowInsights] = useState(true);
-  
+
   // Form state
   const [formOpen, setFormOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<StudySession | null>(null);
   const [defaultDay, setDefaultDay] = useState<DayOfWeek | undefined>(undefined);
-  
+
   // Confirm dialogs
-  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; sessionId: string | null }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    open: boolean;
+    sessionId: string | null;
+  }>({
     open: false,
     sessionId: null
   });
+
   const [clearConfirm, setClearConfirm] = useState(false);
 
   // Check if timetable is empty
   const isEmpty = sessions.length === 0;
 
-  // Responsive: hide insights on smaller screens
+  // Responsive insights handling
   useEffect(() => {
     const handleResize = () => {
       setShowInsights(window.innerWidth >= 1024);
     };
+
     handleResize();
     window.addEventListener('resize', handleResize);
+
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Handlers
-  const handleAddSession = useCallback((day?: DayOfWeek) => {
-    setEditingSession(null);
-    setDefaultDay(day || currentDay);
-    setFormOpen(true);
-  }, [currentDay]);
+  const handleAddSession = useCallback(
+    (day?: DayOfWeek) => {
+      setEditingSession(null);
+      setDefaultDay(day || currentDay);
+      setFormOpen(true);
+    },
+    [currentDay]
+  );
 
   const handleEditSession = useCallback((session: StudySession) => {
     setEditingSession(session);
@@ -79,36 +91,56 @@ const Index = () => {
 
   const confirmDelete = useCallback(() => {
     if (deleteConfirm.sessionId) {
-      const session = sessions.find(s => s.id === deleteConfirm.sessionId);
+      const session = sessions.find(
+        s => s.id === deleteConfirm.sessionId
+      );
+
       deleteSession(deleteConfirm.sessionId);
+
       toast.success('Session deleted', {
-        description: session ? `"${session.courseName}" has been removed` : undefined
+        description: session
+          ? `"${session.courseName}" has been removed`
+          : undefined
       });
     }
+
     setDeleteConfirm({ open: false, sessionId: null });
   }, [deleteConfirm.sessionId, sessions, deleteSession]);
 
-  const handleFormSubmit = useCallback((
-    sessionData: Omit<StudySession, 'id' | 'createdAt' | 'updatedAt'>
-  ) => {
-    if (editingSession) {
-      const result = updateSession(editingSession.id, sessionData);
-      if (result.success) {
-        toast.success('Session updated', {
-          description: `"${sessionData.courseName}" has been saved`
-        });
+  const handleFormSubmit = useCallback(
+    (
+      sessionData: Omit<
+        StudySession,
+        'id' | 'createdAt' | 'updatedAt'
+      >
+    ) => {
+      if (editingSession) {
+        const result = updateSession(
+          editingSession.id,
+          sessionData
+        );
+
+        if (result.success) {
+          toast.success('Session updated', {
+            description: `"${sessionData.courseName}" has been saved`
+          });
+        }
+
+        return result;
       }
-      return result;
-    } else {
+
       const result = addSession(sessionData);
+
       if (result.success) {
         toast.success('Session added', {
           description: `"${sessionData.courseName}" has been scheduled`
         });
       }
+
       return result;
-    }
-  }, [editingSession, addSession, updateSession]);
+    },
+    [editingSession, addSession, updateSession]
+  );
 
   const handleClearAll = useCallback(() => {
     setClearConfirm(true);
@@ -117,24 +149,25 @@ const Index = () => {
   const confirmClearAll = useCallback(() => {
     clearSessions();
     setSamplesLoaded(false);
+
     toast.success('All sessions cleared', {
       description: 'Your timetable has been reset'
     });
+
     setClearConfirm(false);
   }, [clearSessions, setSamplesLoaded]);
 
   const handleLoadSamples = useCallback(() => {
     const sampleSessions = generateSampleSessions();
     let addedCount = 0;
-    
+
     for (const session of sampleSessions) {
       const result = addSession(session);
-      if (result.success) {
-        addedCount++;
-      }
+      if (result.success) addedCount++;
     }
 
     setSamplesLoaded(true);
+
     toast.success('Sample schedule loaded', {
       description: `Added ${addedCount} study sessions to your timetable`
     });
@@ -153,18 +186,17 @@ const Index = () => {
         sessionCount={sessions.length}
       />
 
-      <main className="flex-1 container py-4 px-4 relative">
-        {/* Today's Focus Bar - only show when there are sessions */}
+      <main className="flex-1 container relative py-4 px-2 sm:px-4">
         {!isEmpty && (
-          <TodaysFocus 
-            sessions={todaysSessions} 
+          <TodaysFocus
+            sessions={todaysSessions}
             currentDay={currentDay}
           />
         )}
 
-        <div className="flex gap-4 h-full">
-          {/* Main timetable area */}
-          <div className="flex-1 relative min-w-0">
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Timetable */}
+          <div className="flex-1 relative min-w-0 overflow-x-auto">
             <WeeklyTimetable
               sessions={sessions}
               getSessionsByDay={getSessionsByDay}
@@ -176,17 +208,16 @@ const Index = () => {
               onDeleteSession={handleDeleteSession}
               selectedCourse={selectedCourse}
             />
-            
-            {/* Empty state overlay */}
+
             {isEmpty && (
-              <EmptyState 
-                onAddSession={() => handleAddSession()} 
+              <EmptyState
+                onAddSession={() => handleAddSession()}
                 onLoadSamples={handleLoadSamples}
               />
             )}
           </div>
 
-          {/* Insights sidebar - responsive */}
+          {/* Insights */}
           {showInsights && (
             <InsightsPanel
               weekStats={weekStats}
@@ -197,7 +228,6 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Session Form Dialog */}
       <SessionForm
         open={formOpen}
         onOpenChange={setFormOpen}
@@ -206,10 +236,16 @@ const Index = () => {
         defaultDay={defaultDay}
       />
 
-      {/* Delete Confirmation */}
       <ConfirmDialog
         open={deleteConfirm.open}
-        onOpenChange={(open) => setDeleteConfirm({ open, sessionId: open ? deleteConfirm.sessionId : null })}
+        onOpenChange={open =>
+          setDeleteConfirm({
+            open,
+            sessionId: open
+              ? deleteConfirm.sessionId
+              : null
+          })
+        }
         title="Delete Session"
         description="Are you sure you want to delete this study session? This action cannot be undone."
         confirmLabel="Delete"
@@ -217,7 +253,6 @@ const Index = () => {
         onConfirm={confirmDelete}
       />
 
-      {/* Clear All Confirmation */}
       <ConfirmDialog
         open={clearConfirm}
         onOpenChange={setClearConfirm}

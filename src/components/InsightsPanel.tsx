@@ -10,6 +10,7 @@ interface InsightsPanelProps {
 }
 
 export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPanelProps) {
+  // --- WEEK STATUS MESSAGE ---
   const getStatusMessage = (status: WeekStats['status']) => {
     switch (status) {
       case 'light':
@@ -25,6 +26,7 @@ export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPa
     }
   };
 
+  // --- DAY STATUS LABEL ---
   const getDayStatusLabel = (status: DayStats['status']) => {
     switch (status) {
       case 'free': return 'Free';
@@ -36,25 +38,28 @@ export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPa
     }
   };
 
-  const statusInfo = getStatusMessage(weekStats.status);
+  const statusInfo = getStatusMessage(weekStats?.status);
   const StatusIcon = statusInfo.icon;
 
-  // Calculate percentage of "recommended" study hours (assuming 25 hours/week is ideal)
-  const recommendedMinutes = 25 * 60; // 1500 minutes
-  const percentage = Math.min((weekStats.totalMinutes / recommendedMinutes) * 100, 100);
+  // Calculate weekly percentage (assuming 25h/week)
+  const recommendedMinutes = 25 * 60;
+  const percentage = Math.min((weekStats?.totalMinutes ?? 0) / recommendedMinutes * 100, 100);
+
+  // --- SAFETY WRAPPERS ---
+  const safeGetDayStats = (day: DayOfWeek) => getDayStats?.(day) ?? { totalMinutes: 0, sessionCount: 0, status: 'free' };
 
   return (
-    <div className="w-72 flex-shrink-0 space-y-4 animate-slide-in">
-      {/* Weekly Summary Card */}
+    <div className="w-full max-w-sm sm:w-72 flex-shrink space-y-4 animate-slide-in">
+      {/* ---------- WEEKLY SUMMARY CARD ---------- */}
       <div className="bg-card rounded-lg border border-border p-4">
-        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+        <h3 className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
           Weekly Overview
         </h3>
 
-        {/* Progress circle */}
-        <div className="flex items-center gap-4 mb-4">
-          <div className="relative w-16 h-16">
-            <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
+          {/* --- Progress Circle --- */}
+          <div className="relative w-24 h-24 sm:w-16 sm:h-16 flex-shrink-0">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
               <circle
                 cx="32"
                 cy="32"
@@ -73,26 +78,27 @@ export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPa
                 strokeLinecap="round"
                 className={cn(
                   'transition-all duration-500',
-                  weekStats.status === 'light' && 'stroke-intensity-light',
-                  weekStats.status === 'balanced' && 'stroke-primary',
-                  weekStats.status === 'heavy' && 'stroke-intensity-medium',
-                  weekStats.status === 'overloaded' && 'stroke-intensity-heavy'
+                  weekStats?.status === 'light' && 'stroke-intensity-light',
+                  weekStats?.status === 'balanced' && 'stroke-primary',
+                  weekStats?.status === 'heavy' && 'stroke-intensity-medium',
+                  weekStats?.status === 'overloaded' && 'stroke-intensity-heavy'
                 )}
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg font-semibold">
-                {formatDuration(weekStats.totalMinutes).split(' ')[0]}
+              <span className="text-base sm:text-lg font-semibold">
+                {formatDuration(weekStats?.totalMinutes ?? 0).split(' ')[0]}
               </span>
             </div>
           </div>
 
+          {/* --- Weekly Stats --- */}
           <div className="flex-1">
             <p className="text-sm font-medium text-foreground">
-              {formatDuration(weekStats.totalMinutes)}
+              {formatDuration(weekStats?.totalMinutes ?? 0)}
             </p>
             <p className="text-xs text-muted-foreground">
-              {weekStats.totalSessions} sessions total
+              {weekStats?.totalSessions ?? 0} session{(weekStats?.totalSessions ?? 0) !== 1 ? 's' : ''} total
             </p>
             <div className={cn('flex items-center gap-1 mt-1 text-xs', statusInfo.color)}>
               <StatusIcon className="h-3 w-3" />
@@ -101,26 +107,23 @@ export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPa
           </div>
         </div>
 
-        {/* Daily breakdown */}
+        {/* --- Daily Breakdown --- */}
         <div className="space-y-2">
-          <h4 className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+          <h4 className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
             Daily Breakdown
           </h4>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-1">
             {DAYS_OF_WEEK.map((day) => {
-              const stats = getDayStats(day);
+              const stats = safeGetDayStats(day);
               const isToday = day === currentDay;
-              const maxHeight = 48;
-              const barHeight = stats.totalMinutes > 0 
-                ? Math.max((stats.totalMinutes / 480) * maxHeight, 8)
+              const maxHeight = 48; // px
+              const barHeight = stats.totalMinutes > 0
+                ? Math.max((stats.totalMinutes / 480) * maxHeight, 6)
                 : 4;
 
               return (
                 <div key={day} className="flex flex-col items-center gap-1">
-                  <div 
-                    className="relative w-full flex items-end justify-center"
-                    style={{ height: `${maxHeight}px` }}
-                  >
+                  <div className="relative w-full flex items-end justify-center" style={{ height: `${maxHeight}px` }}>
                     <div
                       className={cn(
                         'w-full max-w-[20px] rounded-t transition-all duration-300',
@@ -135,7 +138,7 @@ export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPa
                     />
                   </div>
                   <span className={cn(
-                    'text-[9px] uppercase',
+                    'text-[8px] sm:text-[9px] uppercase',
                     isToday ? 'text-primary font-semibold' : 'text-muted-foreground'
                   )}>
                     {DAY_LABELS[day].charAt(0)}
@@ -147,19 +150,19 @@ export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPa
         </div>
       </div>
 
-      {/* Today's Focus Card */}
+      {/* ---------- TODAY'S FOCUS CARD ---------- */}
       <div className="bg-card rounded-lg border border-border p-4">
-        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-          <Clock className="h-3.5 w-3.5" />
+        <h3 className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
+          <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           Today's Load
         </h3>
 
         {(() => {
-          const todayStats = getDayStats(currentDay);
+          const todayStats = safeGetDayStats(currentDay);
           return (
             <div>
-              <div className="flex items-baseline gap-2 mb-1">
-                <span className="text-2xl font-semibold">
+              <div className="flex flex-wrap items-baseline gap-2 mb-1">
+                <span className="text-xl sm:text-2xl font-semibold">
                   {formatDuration(todayStats.totalMinutes)}
                 </span>
                 <span className={cn(
@@ -173,43 +176,42 @@ export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPa
                   {getDayStatusLabel(todayStats.status)}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {todayStats.sessionCount === 0 
+              <p className="text-[9px] sm:text-xs text-muted-foreground">
+                {todayStats.sessionCount === 0
                   ? 'No sessions scheduled'
-                  : `${todayStats.sessionCount} session${todayStats.sessionCount !== 1 ? 's' : ''} planned`
-                }
+                  : `${todayStats.sessionCount} session${todayStats.sessionCount !== 1 ? 's' : ''} planned`}
               </p>
             </div>
           );
         })()}
       </div>
 
-      {/* Busiest Day Insight */}
-      {weekStats.busiestDay && (
+      {/* ---------- BUSIEST DAY CARD ---------- */}
+      {weekStats?.busiestDay && (
         <div className="bg-card rounded-lg border border-border p-4">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+          <h3 className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Busiest Day
           </h3>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium capitalize">
+            <span className="text-sm sm:text-base font-medium capitalize">
               {weekStats.busiestDay}
             </span>
-            <span className="text-xs text-muted-foreground">
-              {formatDuration(getDayStats(weekStats.busiestDay).totalMinutes)}
+            <span className="text-[9px] sm:text-xs text-muted-foreground">
+              {formatDuration(safeGetDayStats(weekStats.busiestDay).totalMinutes)}
             </span>
           </div>
         </div>
       )}
 
-      {/* Average Study Time */}
+      {/* ---------- DAILY AVERAGE CARD ---------- */}
       <div className="bg-card rounded-lg border border-border p-4">
-        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+        <h3 className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
           Daily Average
         </h3>
-        <p className="text-lg font-semibold">
-          {formatDuration(Math.round(weekStats.averagePerDay))}
+        <p className="text-lg sm:text-xl font-semibold">
+          {formatDuration(Math.round(weekStats?.averagePerDay ?? 0))}
         </p>
-        <p className="text-xs text-muted-foreground">per day</p>
+        <p className="text-[9px] sm:text-xs text-muted-foreground">per day</p>
       </div>
     </div>
   );

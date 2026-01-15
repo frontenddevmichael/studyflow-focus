@@ -1,14 +1,24 @@
 import { cn } from '@/lib/utils';
-import { DayOfWeek, DAYS_OF_WEEK, DAY_LABELS, DAY_FULL_LABELS, StudySession } from '@/types/study';
+import {
+  DayOfWeek,
+  DAYS_OF_WEEK,
+  DAY_LABELS,
+  DAY_FULL_LABELS,
+  StudySession
+} from '@/types/study';
 import { DayStats } from '@/types/study';
 import { SessionCard } from './SessionCard';
-import { formatDuration, timeToMinutes, getCurrentTime } from '@/lib/timeUtils';
+import {
+  formatDuration,
+  timeToMinutes,
+  getCurrentTime
+} from '@/lib/timeUtils';
 import { Plus, Calendar, Coffee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
-  TooltipTrigger,
+  TooltipTrigger
 } from '@/components/ui/tooltip';
 
 interface WeeklyTimetableProps {
@@ -23,7 +33,14 @@ interface WeeklyTimetableProps {
   selectedCourse: string | null;
 }
 
-const TIME_SLOTS = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+const TIME_SLOTS = [
+  6, 7, 8, 9, 10, 11, 12,
+  13, 14, 15, 16, 17, 18,
+  19, 20, 21, 22
+];
+
+const GRID_ROW_HEIGHT = 64;
+const GRID_TOTAL_HEIGHT = TIME_SLOTS.length * GRID_ROW_HEIGHT;
 
 export function WeeklyTimetable({
   getSessionsByDay,
@@ -36,7 +53,7 @@ export function WeeklyTimetable({
   selectedCourse
 }: WeeklyTimetableProps) {
   const currentTime = getCurrentTime();
-  const currentHour = parseInt(currentTime.split(':')[0]);
+  const currentHour = parseInt(currentTime.split(':')[0], 10);
 
   const getStatusColor = (status: DayStats['status']) => {
     switch (status) {
@@ -61,17 +78,19 @@ export function WeeklyTimetable({
   };
 
   return (
-    <div className="flex-1 overflow-x-auto">
-      <div className="min-w-[900px]">
-        {/* Header row with days */}
-        <div className="grid grid-cols-[60px_repeat(7,1fr)] gap-px bg-border/50 rounded-t-lg overflow-hidden">
-          {/* Time column header */}
-          <div className="bg-card p-3 flex items-center justify-center">
+    <div className="relative w-full overflow-x-auto">
+      <div className="w-[980px]">
+
+        {/* HEADER */}
+        <div
+          className="grid"
+          style={{ gridTemplateColumns: '64px repeat(7, 1fr)' }}
+        >
+          <div className="bg-card flex items-center justify-center h-12 border-b">
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </div>
 
-          {/* Day headers */}
-          {DAYS_OF_WEEK.map((day) => {
+          {DAYS_OF_WEEK.map(day => {
             const stats = getDayStats(day);
             const isToday = day === currentDay;
 
@@ -79,160 +98,146 @@ export function WeeklyTimetable({
               <div
                 key={day}
                 className={cn(
-                  'bg-card p-3 text-center transition-colors',
-                  isToday && 'bg-primary/5 border-b-2 border-primary',
+                  'bg-card px-2 py-1 border-b',
+                  isToday && 'bg-primary/5 border-primary',
                   focusMode && day !== currentDay && 'opacity-50'
                 )}
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span className={cn(
-                      'text-xs uppercase tracking-wider',
-                      isToday ? 'text-primary font-semibold' : 'text-muted-foreground'
-                    )}>
-                      {DAY_LABELS[day]}
-                    </span>
-                    {isToday && (
-                      <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary">
-                        Today
-                      </span>
+                  <span
+                    className={cn(
+                      'text-xs font-medium',
+                      isToday ? 'text-primary' : 'text-muted-foreground'
                     )}
-                  </div>
+                  >
+                    {DAY_LABELS[day]}
+                  </span>
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="ghost"
                         size="icon"
-                        className="h-6 w-6 hover:bg-primary/20 hover:text-primary"
+                        variant="ghost"
+                        className="h-6 w-6"
                         onClick={() => onAddSession(day)}
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent className="text-xs">
+                    <TooltipContent>
                       Add session on {DAY_FULL_LABELS[day]}
                     </TooltipContent>
                   </Tooltip>
                 </div>
 
-                {/* Day stats */}
-                <div className={cn(
-                  'mt-1.5 text-[10px] inline-flex items-center gap-1 px-2 py-0.5 rounded-full',
-                  getStatusBg(stats.status)
-                )}>
-                  <span className={getStatusColor(stats.status)}>
-                    {stats.totalMinutes > 0 
-                      ? `${formatDuration(stats.totalMinutes)} · ${stats.sessionCount} session${stats.sessionCount !== 1 ? 's' : ''}`
-                      : 'No sessions'
-                    }
-                  </span>
+                <div
+                  className={cn(
+                    'mt-1 text-[10px] px-2 py-0.5 rounded-full inline-block',
+                    getStatusBg(stats.status),
+                    getStatusColor(stats.status)
+                  )}
+                >
+                  {stats.totalMinutes
+                    ? `${formatDuration(stats.totalMinutes)}`
+                    : 'Free'}
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Time grid */}
-        <div className="grid grid-cols-[60px_repeat(7,1fr)] bg-border/30 rounded-b-lg overflow-hidden">
-          {/* Time labels column */}
-          <div className="bg-card/50">
-            {TIME_SLOTS.map((hour) => (
+        {/* BODY */}
+        <div
+          className="grid relative"
+          style={{
+            gridTemplateColumns: '64px repeat(7, 1fr)',
+            height: GRID_TOTAL_HEIGHT
+          }}
+        >
+          {/* TIME COLUMN */}
+          <div className="bg-card/60 border-r">
+            {TIME_SLOTS.map(hour => (
               <div
                 key={hour}
-                className={cn(
-                  'h-16 border-b border-border/30 flex items-start justify-end pr-2 pt-1',
-                  hour === currentHour && 'bg-primary/5'
-                )}
+                className="flex items-start justify-end pr-2 pt-1 border-b text-[10px] font-mono"
+                style={{ height: GRID_ROW_HEIGHT }}
               >
-                <span className={cn(
-                  'text-[10px] font-mono',
-                  hour === currentHour ? 'text-primary' : 'text-muted-foreground'
-                )}>
-                  {hour.toString().padStart(2, '0')}:00
-                </span>
+                {hour.toString().padStart(2, '0')}:00
               </div>
             ))}
           </div>
 
-          {/* Day columns */}
-          {DAYS_OF_WEEK.map((day) => {
+          {/* DAYS */}
+          {DAYS_OF_WEEK.map(day => {
             const daySessions = getSessionsByDay(day)
               .filter(s => !selectedCourse || s.courseName === selectedCourse);
+
             const isToday = day === currentDay;
-            const stats = getDayStats(day);
 
             return (
               <div
                 key={day}
                 className={cn(
-                  'relative bg-card/30',
-                  isToday && 'bg-primary/[0.02]',
-                  focusMode && day !== currentDay && 'focus-dimmed'
+                  'relative border-r bg-card/30',
+                  isToday && 'bg-primary/[0.03]'
                 )}
+                style={{ height: GRID_TOTAL_HEIGHT }}
               >
-                {/* Hour grid lines */}
-                {TIME_SLOTS.map((hour) => (
+                {TIME_SLOTS.map(hour => (
                   <div
                     key={hour}
-                    className={cn(
-                      'h-16 border-b border-border/20 transition-colors',
-                      hour === currentHour && isToday && 'bg-primary/5'
-                    )}
+                    className="border-b"
+                    style={{ height: GRID_ROW_HEIGHT }}
                   />
                 ))}
 
-                {/* Current time indicator */}
+                {/* CURRENT TIME LINE */}
                 {isToday && currentHour >= 6 && currentHour <= 22 && (
                   <div
-                    className="absolute left-0 right-0 h-0.5 bg-primary/60 z-10"
+                    className="absolute left-0 right-0 h-0.5 bg-primary z-10"
                     style={{
-                      top: `${((currentHour - 6) * 64) + (parseInt(currentTime.split(':')[1]) / 60 * 64)}px`
+                      top:
+                        (currentHour - 6) * GRID_ROW_HEIGHT +
+                        (parseInt(currentTime.split(':')[1], 10) / 60) *
+                        GRID_ROW_HEIGHT
                     }}
-                  >
-                    <div className="absolute -left-1 -top-1 w-2 h-2 rounded-full bg-primary" />
-                  </div>
+                  />
                 )}
 
-                {/* Sessions */}
-                <div className="absolute inset-0 p-1 overflow-hidden">
-                  {daySessions.map((session) => {
-                    const startHour = parseInt(session.startTime.split(':')[0]);
-                    const startMin = parseInt(session.startTime.split(':')[1]);
-                    const endHour = parseInt(session.endTime.split(':')[0]);
-                    const endMin = parseInt(session.endTime.split(':')[1]);
+                {/* SESSIONS */}
+                {daySessions.map(session => {
+                  const start = timeToMinutes(session.startTime);
+                  const end = timeToMinutes(session.endTime);
 
-                    const top = ((startHour - 6) * 64) + (startMin / 60 * 64);
-                    const height = ((endHour - startHour) * 64) + ((endMin - startMin) / 60 * 64);
+                  const top =
+                    ((start - 360) / 60) * GRID_ROW_HEIGHT;
+                  const height =
+                    ((end - start) / 60) * GRID_ROW_HEIGHT;
 
-                    // Check if this session is upcoming (within next 2 hours today)
-                    const isUpcoming = isToday && 
-                      timeToMinutes(session.startTime) > timeToMinutes(currentTime) &&
-                      timeToMinutes(session.startTime) <= timeToMinutes(currentTime) + 120;
+                  return (
+                    <div
+                      key={session.id}
+                      className="absolute left-1 right-1"
+                      style={{
+                        top,
+                        height: Math.max(height, 32)
+                      }}
+                    >
+                      <SessionCard
+                        session={session}
+                        onEdit={onEditSession}
+                        onDelete={onDeleteSession}
+                        compact={height < 80}
+                      />
+                    </div>
+                  );
+                })}
 
-                    return (
-                      <div
-                        key={session.id}
-                        className="absolute left-1 right-1 animate-fade-in"
-                        style={{ top: `${top}px`, height: `${Math.max(height - 4, 32)}px` }}
-                      >
-                        <SessionCard
-                          session={session}
-                          onEdit={onEditSession}
-                          onDelete={onDeleteSession}
-                          compact={height < 80}
-                          isUpcoming={isUpcoming}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Empty state for the day */}
-                {daySessions.length === 0 && stats.status === 'free' && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center text-muted-foreground/40">
-                      <Coffee className="h-6 w-6 mx-auto mb-1 opacity-50" />
-                      <p className="text-[10px]">Free day</p>
+                {daySessions.length === 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/40">
+                    <div className="text-center">
+                      <Coffee className="h-6 w-6 mx-auto mb-1" />
+                      <span className="text-[10px]">Free day</span>
                     </div>
                   </div>
                 )}
