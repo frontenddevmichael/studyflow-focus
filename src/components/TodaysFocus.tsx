@@ -48,23 +48,23 @@ export function TodaysFocus({ sessions }: TodaysFocusProps) {
   }
 
   return (
-    <div className="bg-card/50 border border-border rounded-lg p-4 mb-4 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="bg-card/50 border border-border rounded-lg p-3 sm:p-4 mb-4 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {/* Current/Next Session */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           {currentSession ? (
             <div className="flex items-center gap-3">
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                   <Clock className="h-5 w-5 text-primary" />
                 </div>
                 <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-primary animate-pulse-soft" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs text-primary font-medium uppercase tracking-wide">
                   In Progress
                 </p>
-                <p className="text-sm font-semibold text-foreground">
+                <p className="text-sm font-semibold text-foreground truncate">
                   {currentSession.courseName}
                 </p>
                 <p className="text-xs text-muted-foreground font-mono">
@@ -74,18 +74,19 @@ export function TodaysFocus({ sessions }: TodaysFocusProps) {
             </div>
           ) : nextSession ? (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
                 <ArrowRight className="h-5 w-5 text-muted-foreground" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                   Up Next
                 </p>
-                <p className="text-sm font-semibold text-foreground">
+                <p className="text-sm font-semibold text-foreground truncate">
                   {nextSession.courseName}
                 </p>
                 <p className="text-xs text-muted-foreground font-mono">
-                  Starts at {formatTimeDisplay(nextSession.startTime)}
+                  <span className="hidden sm:inline">Starts at </span>
+                  {formatTimeDisplay(nextSession.startTime)}
                   {' · '}
                   <span className="text-primary">
                     in {formatDuration(timeToMinutes(nextSession.startTime) - currentMinutes)}
@@ -95,7 +96,7 @@ export function TodaysFocus({ sessions }: TodaysFocusProps) {
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
                 <Check className="h-5 w-5 text-success" />
               </div>
               <div>
@@ -103,7 +104,8 @@ export function TodaysFocus({ sessions }: TodaysFocusProps) {
                   All Done!
                 </p>
                 <p className="text-sm font-medium text-foreground">
-                  You've completed all sessions for today
+                  <span className="hidden sm:inline">You've completed all sessions for today</span>
+                  <span className="sm:hidden">All sessions complete!</span>
                 </p>
               </div>
             </div>
@@ -111,18 +113,20 @@ export function TodaysFocus({ sessions }: TodaysFocusProps) {
         </div>
 
         {/* Progress indicator */}
-        <div className="text-right">
+        <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0 border-t sm:border-0 pt-2 sm:pt-0">
           <p className="text-xs text-muted-foreground">
             Today's Progress
           </p>
-          <p className="text-lg font-semibold text-foreground">
-            {completedCount}/{sessions.length}
-          </p>
-          <div className="w-24 h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
-            <div 
-              className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${(completedCount / sessions.length) * 100}%` }}
-            />
+          <div className="flex items-center gap-2 sm:flex-col sm:items-end">
+            <p className="text-lg font-semibold text-foreground">
+              {completedCount}/{sessions.length}
+            </p>
+            <div className="w-20 sm:w-24 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${(completedCount / sessions.length) * 100}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
