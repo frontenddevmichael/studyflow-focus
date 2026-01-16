@@ -7,9 +7,10 @@ interface InsightsPanelProps {
   weekStats: WeekStats;
   getDayStats: (day: DayOfWeek) => DayStats;
   currentDay: DayOfWeek;
+  isMobile?: boolean;
 }
 
-export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPanelProps) {
+export function InsightsPanel({ weekStats, getDayStats, currentDay, isMobile = false }: InsightsPanelProps) {
   // --- WEEK STATUS MESSAGE ---
   const getStatusMessage = (status: WeekStats['status']) => {
     switch (status) {
@@ -49,7 +50,10 @@ export function InsightsPanel({ weekStats, getDayStats, currentDay }: InsightsPa
   const safeGetDayStats = (day: DayOfWeek) => getDayStats?.(day) ?? { totalMinutes: 0, sessionCount: 0, status: 'free' };
 
   return (
-    <div className="w-full max-w-sm sm:w-72 flex-shrink space-y-4 animate-slide-in">
+    <div className={cn(
+      "flex-shrink space-y-4",
+      isMobile ? "w-full" : "w-full max-w-sm sm:w-72 animate-slide-in"
+    )}>
       {/* ---------- WEEKLY SUMMARY CARD ---------- */}
       <div className="bg-card rounded-lg border border-border p-4">
         <h3 className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">

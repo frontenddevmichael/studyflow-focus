@@ -124,7 +124,7 @@ export function SessionForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] bg-card border-border">
+      <DialogContent className="sm:max-w-[480px] bg-card border-border max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-primary" />
@@ -167,7 +167,7 @@ export function SessionForm({
           </div>
 
           {/* Time Selection */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
@@ -215,7 +215,7 @@ export function SessionForm({
           )}
 
           {/* Session Type & Intensity */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Session Type</Label>
               <Select value={type} onValueChange={(v) => setType(v as SessionType)}>

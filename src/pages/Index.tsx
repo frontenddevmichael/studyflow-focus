@@ -9,8 +9,11 @@ import { SessionForm } from '@/components/SessionForm';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { EmptyState } from '@/components/EmptyState';
 import { TodaysFocus } from '@/components/TodaysFocus';
+import { MobileDayView } from '@/components/MobileDayView';
+import { MobileInsightsDrawer } from '@/components/MobileInsightsDrawer';
 import { toast } from 'sonner';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const {
@@ -36,7 +39,11 @@ const Index = () => {
   // UI State
   const [focusMode, setFocusMode] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
-  const [showInsights, setShowInsights] = useState(true);
+  const [selectedDay, setSelectedDay] = useState<DayOfWeek>(currentDay);
+  
+  // Responsive
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   // Form state
   const [formOpen, setFormOpen] = useState(false);
@@ -56,18 +63,6 @@ const Index = () => {
 
   // Check if timetable is empty
   const isEmpty = sessions.length === 0;
-
-  // Responsive insights handling
-  useEffect(() => {
-    const handleResize = () => {
-      setShowInsights(window.innerWidth >= 1024);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Handlers
   const handleAddSession = useCallback(
@@ -186,47 +181,86 @@ const Index = () => {
         sessionCount={sessions.length}
       />
 
-      <main className="flex-1 container relative py-4 px-2 sm:px-4">
-        {!isEmpty && (
+      <main className="flex-1 container relative py-3 sm:py-4 px-2 sm:px-4">
+        {/* Today's Focus - Hidden on mobile (built into MobileDayView) */}
+        {!isEmpty && !isMobile && (
           <TodaysFocus
             sessions={todaysSessions}
             currentDay={currentDay}
           />
         )}
 
-        <div className="flex flex-col lg:flex-row gap-4">
-          {/* Timetable */}
-          <div className="flex-1 relative min-w-0 overflow-x-auto">
-            <WeeklyTimetable
+        {/* Mobile View */}
+        {isMobile && !isEmpty ? (
+          <div className="h-[calc(100vh-8rem)]">
+            <MobileDayView
               sessions={sessions}
               getSessionsByDay={getSessionsByDay}
               getDayStats={getDayStats}
               currentDay={currentDay}
+              selectedDay={selectedDay}
+              onSelectDay={setSelectedDay}
               focusMode={focusMode}
               onAddSession={handleAddSession}
               onEditSession={handleEditSession}
               onDeleteSession={handleDeleteSession}
               selectedCourse={selectedCourse}
             />
-
-            {isEmpty && (
-              <EmptyState
-                onAddSession={() => handleAddSession()}
-                onLoadSamples={handleLoadSamples}
-              />
-            )}
           </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Timetable */}
+            <div className="flex-1 relative min-w-0 overflow-x-auto">
+              <WeeklyTimetable
+                sessions={sessions}
+                getSessionsByDay={getSessionsByDay}
+                getDayStats={getDayStats}
+                currentDay={currentDay}
+                focusMode={focusMode}
+                onAddSession={handleAddSession}
+                onEditSession={handleEditSession}
+                onDeleteSession={handleDeleteSession}
+                selectedCourse={selectedCourse}
+              />
 
-          {/* Insights */}
-          {showInsights && (
-            <InsightsPanel
-              weekStats={weekStats}
-              getDayStats={getDayStats}
-              currentDay={currentDay}
+              {isEmpty && (
+                <EmptyState
+                  onAddSession={() => handleAddSession()}
+                  onLoadSamples={handleLoadSamples}
+                />
+              )}
+            </div>
+
+            {/* Insights - Desktop only */}
+            <div className="hidden lg:block">
+              <InsightsPanel
+                weekStats={weekStats}
+                getDayStats={getDayStats}
+                currentDay={currentDay}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Empty State */}
+        {isMobile && isEmpty && (
+          <div className="h-[calc(100vh-8rem)] flex items-center justify-center">
+            <EmptyState
+              onAddSession={() => handleAddSession()}
+              onLoadSamples={handleLoadSamples}
             />
-          )}
-        </div>
+          </div>
+        )}
       </main>
+
+      {/* Mobile Insights Drawer */}
+      {!isEmpty && (
+        <MobileInsightsDrawer
+          weekStats={weekStats}
+          getDayStats={getDayStats}
+          currentDay={currentDay}
+        />
+      )}
 
       <SessionForm
         open={formOpen}
@@ -265,5 +299,22 @@ const Index = () => {
     </div>
   );
 };
+
+// Hook for tablet detection
+function useIsTablet() {
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const checkTablet = () => {
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024);
+    };
+    
+    checkTablet();
+    window.addEventListener('resize', checkTablet);
+    return () => window.removeEventListener('resize', checkTablet);
+  }, []);
+
+  return isTablet;
+}
 
 export default Index;

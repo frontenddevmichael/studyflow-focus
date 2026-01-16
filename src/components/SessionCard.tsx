@@ -107,9 +107,10 @@ export function SessionCard({
         </p>
       )}
 
-      {/* Action buttons - shown on hover */}
+      {/* Action buttons - visible on touch/mobile, hover on desktop */}
       <div className={cn(
-        'absolute right-2 bottom-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity',
+        'absolute right-2 bottom-2 flex gap-1 transition-opacity',
+        'opacity-100 md:opacity-0 md:group-hover:opacity-100',
         compact && 'bottom-1 right-1'
       )}>
         <Tooltip>
@@ -118,18 +119,18 @@ export function SessionCard({
               variant="ghost"
               size="icon"
               className={cn(
-                'h-6 w-6 hover:bg-primary/20 hover:text-primary',
-                compact && 'h-5 w-5'
+                'h-7 w-7 md:h-6 md:w-6 bg-background/80 hover:bg-primary/20 hover:text-primary',
+                compact && 'h-6 w-6 md:h-5 md:w-5'
               )}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(session);
               }}
             >
-              <Pencil className={cn(compact ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
+              <Pencil className={cn(compact ? 'h-3 w-3 md:h-2.5 md:w-2.5' : 'h-3.5 w-3.5 md:h-3 md:w-3')} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="top" className="text-xs">Edit session</TooltipContent>
+          <TooltipContent side="top" className="text-xs hidden md:block">Edit session</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -138,18 +139,18 @@ export function SessionCard({
               variant="ghost"
               size="icon"
               className={cn(
-                'h-6 w-6 hover:bg-destructive/20 hover:text-destructive',
-                compact && 'h-5 w-5'
+                'h-7 w-7 md:h-6 md:w-6 bg-background/80 hover:bg-destructive/20 hover:text-destructive',
+                compact && 'h-6 w-6 md:h-5 md:w-5'
               )}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(session.id);
               }}
             >
-              <Trash2 className={cn(compact ? 'h-2.5 w-2.5' : 'h-3 w-3')} />
+              <Trash2 className={cn(compact ? 'h-3 w-3 md:h-2.5 md:w-2.5' : 'h-3.5 w-3.5 md:h-3 md:w-3')} />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="top" className="text-xs">Delete session</TooltipContent>
+          <TooltipContent side="top" className="text-xs hidden md:block">Delete session</TooltipContent>
         </Tooltip>
       </div>
     </div>
